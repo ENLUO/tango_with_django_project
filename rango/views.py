@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,reverse
 from django.http import HttpResponse
 from rango.models import Category,Page
 from rango.forms import CategoryForm,PageForm
@@ -15,7 +15,9 @@ def index(request):
 
 def about(request):
     #context_dict = {'This tutorial has been put together by <ENLUO LIU>.'}
-    return render(request, 'rango/about.html')
+    print(request.method)
+    print(request.user)
+    return render(request, 'rango/about.html',{})
 
 def show_category(request , category_name_slug):
     context_dict = {}
@@ -37,7 +39,7 @@ def add_category(request):
         if form.is_valid():
             cat = form.save(commit = True)
             print(cat,cat.slug)
-            return redirect('/rango/')
+            return redirect(reverse('rango:index')) # Chapter 8
         else:
             print(form.errors)
     return render(request,'rango/add_category.html',{'form':form})
@@ -49,7 +51,7 @@ def add_page(request,category_name_slug):
         category = None
 
     if category is None:
-        return redirect('/rango/')
+        return redirect(reverse('rango:index'))
 
     form = PageForm()
 
@@ -61,7 +63,7 @@ def add_page(request,category_name_slug):
                 page.category = category
                 page.views = 0
                 page.save()
-                return show_category(request, category_name_slug)
+                return redirect(reverse('rango:show_category', kwargs={'category_name_slug': category_name_slug}))
 
         else:
             print(form.errors)
